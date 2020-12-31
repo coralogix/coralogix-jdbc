@@ -189,11 +189,11 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
       columnIndex,
       "UNKNOWN",
       {
-        case BoolValue(s)   => new java.lang.Boolean(s)
+        case BoolValue(s)   => java.lang.Boolean.valueOf(s)
         case Empty          => null
         case ListValue(s)   => s
         case NullValue(_)   => null
-        case NumberValue(s) => new java.lang.Double(s)
+        case NumberValue(s) => java.lang.Double.valueOf(s)
         case StringValue(s) => s
         case StructValue(s) => s
       }
