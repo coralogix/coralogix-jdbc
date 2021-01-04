@@ -46,7 +46,6 @@ lazy val root = (project in file("."))
     skip in publish := true
   )
   .dependsOn(grpcDeps)
-//  .enablePlugins(UniversalPlugin, JavaAppPackaging)
 
 lazy val grpcDeps = LocalProject("grpc-deps")
 grpcDeps / Compile / scalacOptions --= Seq("-Wunused:imports", "-Xfatal-warnings")
@@ -54,6 +53,6 @@ grpcDeps / Compile / scalacOptions --= Seq("-Wunused:imports", "-Xfatal-warnings
 // empty project just for the sake of publishing fat jat
 lazy val cosmetic = project
   .settings(
-    name                  := "coralogix-jdbc",
+    name                  := "cosmetic",
     packageBin in Compile := (assembly in (root, Compile)).value
   )
