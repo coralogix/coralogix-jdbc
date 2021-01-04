@@ -51,8 +51,13 @@ lazy val grpcDeps = LocalProject("grpc-deps")
 grpcDeps / Compile / scalacOptions --= Seq("-Wunused:imports", "-Xfatal-warnings")
 
 // empty project just for the sake of publishing fat jat
-lazy val cosmetic = project
+lazy val driver = project
   .settings(
-    name                  := "cosmetic",
-    packageBin in Compile := (assembly in (root, Compile)).value
-  ).dependsOn(grpcDeps)
+    name                  := "coralogix-jdbc",
+    artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
+      artifact.name + "-" + module.revision + "." + artifact.extension
+    },
+    packageBin in Compile := (assembly in (root, Compile)).value,
+    crossVersion := CrossVersion.disabled,
+    libraryDependencies := Nil
+  )
