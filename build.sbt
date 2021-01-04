@@ -1,6 +1,18 @@
 ThisBuild / scalaVersion     := "2.13.4"
-ThisBuild / version          := "0.1.0-SNAPSHOT"
-ThisBuild / organization     := "com.coralogix"
+
+inThisBuild(List(
+  organization := "com.coralogix",
+  homepage := Some(url("https://github.com/coralogix/coralogix-jdbc")),
+  licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+  developers := List(
+    Developer(
+      "fokot",
+      "Frantisek Kocun",
+      "frantisek@coralogix.com",
+      url("https://www.coralogix.com")
+    )
+  )
+))
 
 lazy val root = (project in file("."))
   .settings(
@@ -29,9 +41,17 @@ lazy val root = (project in file("."))
       case "META-INF/MANIFEST.MF" => MergeStrategy.discard
       case _ => MergeStrategy.first
     },
+    skip in publish := true
   )
   .dependsOn(grpcDeps)
 //  .enablePlugins(UniversalPlugin, JavaAppPackaging)
 
 lazy val grpcDeps = LocalProject("grpc-deps")
 grpcDeps / Compile / scalacOptions --= Seq("-Wunused:imports", "-Xfatal-warnings")
+
+// empty project just for the sake of publishing fat jat
+lazy val cosmetic = project
+  .settings(
+    name := "coralogix-jdbc",
+    packageBin in Compile := (assembly in (root, Compile)).value
+  )
