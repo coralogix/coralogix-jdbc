@@ -55,4 +55,4 @@ lazy val cosmetic = project
   .settings(
     name                  := "cosmetic",
     packageBin in Compile := (assembly in (root, Compile)).value
-  )
+  ).dependsOn(grpcDeps)
