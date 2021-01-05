@@ -1,7 +1,5 @@
 package com.coralogix.jdbc
 
-import cats.syntax.either._
-import cats.syntax.option._
 import com.coralogix.sql.grpc.external.v1.SqlQueryService.QueryResponse
 import com.google.protobuf.struct.Value.Kind
 import com.google.protobuf.struct.Value.Kind.{
@@ -68,9 +66,9 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
   ): SqlValue[A] = {
     lastWasNull = false
     r.rows(currentIndex).values(i - 1).kind match {
-      case NullValue(_)          => lastWasNull = true; None.asRight
-      case k if f.isDefinedAt(k) => f(k).some.asRight
-      case k                     => s"Expected $typeName but got ${k.getClass.getName} at index $i".asLeft
+      case NullValue(_)          => lastWasNull = true; Right(None)
+      case k if f.isDefinedAt(k) => Right(Some(f(k)))
+      case k                     => Left(s"Expected $typeName but got ${k.getClass.getName} at index $i")
     }
   }
 

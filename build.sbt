@@ -27,9 +27,9 @@ lazy val root = (project in file("."))
       "com.thesamet.scalapb"               %% "scalapb-runtime-grpc"                    % scalapb.compiler.Version.scalapbVersion,
       "io.grpc"                             % "grpc-netty"                              % "1.34.0",
       "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % "1.18.1-0" % "protobuf",
-      "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % "1.18.1-0",
-      "io.github.scalapb-json"             %% "scalapb-circe"                           % "0.7.1"
+      "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % "1.18.1-0"
     ),
+    excludeDependencies ++= Seq(ExclusionRule("io.circe")),
     scalacOptions --= Seq("-language:implicitConversions", "-Wunused:params"),
     scalacOptions ~= { _.filterNot(_.startsWith("-Wunused")) },
     scalacOptions += "-Wconf:any:warning-verbose",
@@ -43,6 +43,10 @@ lazy val root = (project in file("."))
       case "META-INF/MANIFEST.MF" => MergeStrategy.discard
       case _                      => MergeStrategy.first
     },
+    assemblyShadeRules in assembly := Seq(
+      ShadeRule.rename("com.coralogix.**" -> "com.coralogix.@1").inAll,
+      ShadeRule.rename("*.**" -> "canttouchthis.@0").inAll
+    ),
     skip in publish := true
   )
   .dependsOn(grpcDeps)
@@ -53,11 +57,11 @@ grpcDeps / Compile / scalacOptions --= Seq("-Wunused:imports", "-Xfatal-warnings
 // empty project just for the sake of publishing fat jat
 lazy val driver = project
   .settings(
-    name                  := "coralogix-jdbc",
+    name := "coralogix-jdbc",
     artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
       artifact.name + "-" + module.revision + "." + artifact.extension
     },
     packageBin in Compile := (assembly in (root, Compile)).value,
-    crossVersion := CrossVersion.disabled,
-    libraryDependencies := Nil
+    crossVersion          := CrossVersion.disabled,
+    libraryDependencies   := Nil
   )
