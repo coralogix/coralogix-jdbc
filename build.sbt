@@ -46,23 +46,25 @@ lazy val root = (project in file("."))
       case _                      => MergeStrategy.first
     },
     assemblyShadeRules in assembly := Seq(
-      ShadeRule.rename(
-        "com.coralogix.**" -> "@0",
-        "io.grpc.**" -> "@0",
-        "android.**" -> shade,
-        "com.**" -> shade,
-        "google.**" -> shade,
-        "grpc.**" -> shade,
-        "io.**" -> shade,
-        "izumi.**" -> shade,
-        "org.**" -> shade,
-        "scala.**" -> shade,
-        "scalapb.**" -> shade,
-        "scalapb_circe.**" -> shade,
-        "scalapb_json.**" -> shade,
-        "zio.**" -> shade,
-        "*.**" -> "@0",
-      ).inAll,
+      ShadeRule
+        .rename(
+          "com.coralogix.**" -> "@0",
+          "io.grpc.**"       -> "@0",
+          "android.**"       -> shade,
+          "com.**"           -> shade,
+          "google.**"        -> shade,
+          "grpc.**"          -> shade,
+          "io.**"            -> shade,
+          "izumi.**"         -> shade,
+          "org.**"           -> shade,
+          "scala.**"         -> shade,
+          "scalapb.**"       -> shade,
+          "scalapb_circe.**" -> shade,
+          "scalapb_json.**"  -> shade,
+          "zio.**"           -> shade,
+          "*.**"             -> "@0"
+        )
+        .inAll
     ),
     skip in publish := true
   )
