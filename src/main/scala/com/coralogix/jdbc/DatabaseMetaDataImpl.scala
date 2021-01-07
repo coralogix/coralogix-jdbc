@@ -511,10 +511,32 @@ class DatabaseMetaDataImpl(
     unsupported
 
   override def getPrimaryKeys(catalog: String, schema: String, table: String): ResultSet =
-    unsupported
+    emptyResultSet(
+      e("TABLE_CAT"),
+      e("TABLE_SCHEM"),
+      e("TABLE_NAME"),
+      e("COLUMN_NAME"),
+      e("KEY_SEQ", Type.SHORT),
+      e("PK_NAME")
+    )
 
   override def getImportedKeys(catalog: String, schema: String, table: String): ResultSet =
-    unsupported
+    emptyResultSet(
+      e("PKTABLE_CAT"),
+      e("PKTABLE_SCHEM"),
+      e("PKTABLE_NAME"),
+      e("PKCOLUMN_NAME"),
+      e("FKTABLE_CAT"),
+      e("FKTABLE_SCHEM"),
+      e("FKTABLE_NAME"),
+      e("FKCOLUMN_NAME"),
+      e("KEY_SEQ", Type.SHORT),
+      e("UPDATE_RULE", Type.SHORT),
+      e("DELETE_RULE", Type.SHORT),
+      e("FK_NAME"),
+      e("PK_NAME"),
+      e("DEFERRABILITY", Type.SHORT)
+    )
 
   override def getExportedKeys(catalog: String, schema: String, table: String): ResultSet =
     unsupported
@@ -593,7 +615,21 @@ class DatabaseMetaDataImpl(
     unique: Boolean,
     approximate: Boolean
   ): ResultSet =
-    unsupported
+    emptyResultSet(
+      e("TYPE_CAT"),
+      e("TYPE_SCHEM"),
+      e("TYPE_NAME"),
+      e("NON_UNIQUE", Type.BOOLEAN),
+      e("INDEX_QUALIFIER"),
+      e("INDEX_NAME"),
+      e("TYPE", Type.SHORT),
+      e("ORDINAL_POSITION", Type.SHORT),
+      e("COLUMN_NAME"),
+      e("ASC_OR_DESC"),
+      e("CARDINALITY", Type.LONG),
+      e("PAGES", Type.LONG),
+      e("FILTER_CONDITION")
+    )
 
   override def supportsResultSetType(`type`: Int): Boolean =
     `type` == ResultSet.TYPE_FORWARD_ONLY
