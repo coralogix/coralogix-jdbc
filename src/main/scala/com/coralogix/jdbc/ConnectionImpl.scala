@@ -7,6 +7,7 @@ import java.sql.{
   DatabaseMetaData,
   PreparedStatement,
   ResultSet,
+  SQLException,
   SQLFeatureNotSupportedException,
   SQLNonTransientException,
   SQLWarning,
@@ -38,7 +39,14 @@ class ConnectionImpl(rt: Runtime[SqlQueryServiceClient], val url: String, queryT
 
   override def isClosed: Boolean = !open
 
-  override def getMetaData: DatabaseMetaData = new DatabaseMetaDataImpl(this)
+  override def getMetaData: DatabaseMetaData = new DatabaseMetaDataImpl(rt, queryTimeout, this)
+
+  override def getCatalog: String = "coralogix"
+
+  override def setCatalog(catalog: String): Unit =
+    if (catalog == "coralogix") ()
+    else
+      throw new SQLException(s"No catalog: $catalog")
 
   override def setReadOnly(readOnly: Boolean): Unit =
     if (!readOnly) throw new SQLNonTransientException("Read-write connection not supported")

@@ -7,6 +7,7 @@ import java.sql.{
   Clob,
   NClob,
   PreparedStatement,
+  SQLException,
   SQLXML,
   Savepoint,
   Struct
@@ -51,10 +52,6 @@ trait UnsupportedConnectionMethods extends UnsupportedMethods { self: Connection
   override def rollback(savepoint: Savepoint): Unit = unsupported
 
   override def releaseSavepoint(savepoint: Savepoint): Unit = unsupported
-
-  override def setCatalog(catalog: String): Unit = unsupported
-
-  override def getCatalog: String = unsupported
 
   override def setTransactionIsolation(level: Int): Unit = unsupported
 
