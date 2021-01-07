@@ -12,9 +12,6 @@ jobs:
           fetch-depth: 0
       - uses: olafurpg/setup-scala@v10
       - uses: olafurpg/setup-gpg@v3
-      - uses: webfactory/ssh-agent@v0.4.1
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - run: sbt ci-release
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
