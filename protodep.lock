@@ -2,7 +2,7 @@ proto_outdir = "./grpc-deps/target/protobuf_external_src"
 
 [[dependencies]]
   target = "github.com/coralogix/sql-api-protobuf/"
-  revision = "c4f14f6c75a58d4f470aa202af8436c7ba4658fc"
+  revision = "dcbf74251cfdde9c2bb145f6f4c90d09d634a1ce"
   branch = ""
   path = ""
   protocol = ""

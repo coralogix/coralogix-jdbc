@@ -5,10 +5,12 @@ import com.coralogix.sql.grpc.external.v1.SqlQueryService.{
   QueryParameter,
   QueryRequest,
   QueryResponse,
-  Row
+  Row,
+  SchemaRequest,
+  SchemaResponse
 }
 import com.coralogix.sql.grpc.external.v1.SqlQueryService.ZioSqlQueryService.SqlQueryServiceClient
-import com.google.protobuf.struct.{ Struct, Value }
+import com.google.protobuf.struct.Value
 import io.grpc.{ CallOptions, Status }
 import scalapb.zio_grpc.SafeMetadata
 import zio.test.Assertion.equalTo
@@ -39,6 +41,9 @@ object PreparedStatementTest extends DefaultRunnableSpec {
     override def mapCallOptionsM(
       f: CallOptions => IO[Status, CallOptions]
     ): SqlQueryServiceClient.ZService[R, Context] = Service(req, res)
+
+    override def schema(request: SchemaRequest): ZIO[R with Context, Status, SchemaResponse] =
+      ZIO.fail(Status.NOT_FOUND)
   }
 
   def client(req: QueryRequest, res: QueryResponse): Layer[Throwable, SqlQueryServiceClient] =

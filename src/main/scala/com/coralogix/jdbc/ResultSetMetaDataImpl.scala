@@ -36,7 +36,7 @@ class ResultSetMetaDataImpl(resultSet: ResultSetImpl) extends ResultSetMetaData 
 
   override def getTableName(column: Int): String = "logs"
 
-  override def getCatalogName(column: Int): String = "logs"
+  override def getCatalogName(column: Int): String = "coralogix"
 
   override def getColumnType(column: Int): Int =
     ElasticsearchType.byName(columnDescriptor(column).`type`.name).jdbcType.getVendorTypeNumber

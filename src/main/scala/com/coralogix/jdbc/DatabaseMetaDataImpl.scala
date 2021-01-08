@@ -1,19 +1,72 @@
 package com.coralogix.jdbc
 
 import Proto._
-import com.coralogix.sql.grpc.external.v1.SqlQueryService.{ ColumnDescriptor, QueryResponse, Row }
+import com.coralogix.sql.grpc.external.v1.SqlQueryService.ZioSqlQueryService.SqlQueryServiceClient
+import com.coralogix.sql.grpc.external.v1.SqlQueryService.{
+  ColumnDescriptor,
+  QueryResponse,
+  Row,
+  SchemaRequest,
+  Type
+}
+import com.google.protobuf.empty.Empty
+import com.google.protobuf.struct.Value
+import zio.{ Cause, Runtime, ZIO }
+import zio.duration._
 
 import java.sql.{
   Connection,
   DatabaseMetaData,
+  JDBCType,
   ResultSet,
   RowIdLifetime,
+  SQLException,
   SQLFeatureNotSupportedException
 }
 
-class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData {
+class DatabaseMetaDataImpl(
+  rt: Runtime[SqlQueryServiceClient],
+  queryTimeout: Int,
+  connection: ConnectionImpl
+) extends DatabaseMetaData {
 
   val className = classOf[DatabaseMetaDataImpl].getName
+
+  def cd(column: String, `type`: Type = Type.STRING) =
+    ColumnDescriptor(column, column, `type`)
+
+  def s(column: String, value: String) =
+    (column, Type.STRING, str(value))
+
+  def s(column: String, `type`: Type = Type.STRING) =
+    (column, `type`, `null`)
+
+  def singleRowResultSet(
+    ms: (String, Type, Value)*
+  ) =
+    ResultSetImpl(
+      QueryResponse(
+        List(Row(ms.map(m => m._3))),
+        ms.map(m => ColumnDescriptor(m._1, m._1, m._2)).toList
+      ),
+      "cursor",
+      null
+    )
+
+  def e(column: String, `type`: Type = Type.STRING) =
+    (column, `type`)
+
+  def emptyResultSet(
+    ms: (String, Type)*
+  ) =
+    ResultSetImpl(
+      QueryResponse(
+        Nil,
+        ms.map(m => ColumnDescriptor(m._1, m._1, m._2)).toList
+      ),
+      "cursor",
+      null
+    )
 
   def unsupported = {
     val st = Thread.currentThread().getStackTrace.findLast(_.getClassName == className).get
@@ -147,7 +200,7 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
 
   override def getProcedureTerm: String = "procedure"
 
-  override def getCatalogTerm: String = "coralogixName"
+  override def getCatalogTerm: String = "catalog"
 
   override def isCatalogAtStart: Boolean = false
 
@@ -264,7 +317,18 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
     catalog: String,
     schemaPattern: String,
     procedureNamePattern: String
-  ): ResultSet = unsupported
+  ): ResultSet =
+    emptyResultSet(
+      e("PROCEDURE_CAT"),
+      e("PROCEDURE_SCHEM"),
+      e("PROCEDURE_NAME"),
+      e("RESERVED4"),
+      e("RESERVED5"),
+      e("RESERVED6"),
+      e("REMARKS"),
+      e("PROCEDURE_TYPE", Type.SHORT),
+      e("SPECIFIC_NAME")
+    )
 
   override def getProcedureColumns(
     catalog: String,
@@ -272,7 +336,28 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
     procedureNamePattern: String,
     columnNamePattern: String
   ): ResultSet =
-    unsupported
+    emptyResultSet(
+      e("PROCEDURE_CAT"),
+      e("PROCEDURE_SCHEM"),
+      e("PROCEDURE_NAME"),
+      e("COLUMN_NAME"),
+      e("COLUMN_TYPE", Type.SHORT),
+      e("DATA_TYPE", Type.INTEGER),
+      e("TYPE_NAME"),
+      e("PRECISION", Type.INTEGER),
+      e("LENGTH", Type.INTEGER),
+      e("SCALE", Type.SHORT),
+      e("RADIX", Type.SHORT),
+      e("NULLABLE", Type.SHORT),
+      e("REMARKS"),
+      e("COLUMN_DEF"),
+      e("SQL_DATA_TYPE", Type.INTEGER),
+      e("SQL_DATETIME_SUB", Type.INTEGER),
+      e("CHAR_OCTET_LENGTH", Type.INTEGER),
+      e("ORDINAL_POSITION", Type.INTEGER),
+      e("IS_NULLABLE"),
+      e("SPECIFIC_NAME")
+    )
 
   override def getTables(
     catalog: String,
@@ -280,90 +365,34 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
     tableNamePattern: String,
     types: Array[String]
   ): ResultSet =
-    ResultSetImpl(
-      QueryResponse(
-        List(
-          Row(
-            List(
-              str("logs"),
-              str("BASE TABLE"),
-              str("Coralogix"),
-              str("Logs table")
-            )
-          )
-        ),
-        List(
-          ColumnDescriptor("TABLE_NAME", "TABLE_NAME"),
-          ColumnDescriptor("TABLE_TYPE", "TABLE_TYPE"),
-          ColumnDescriptor("TABLE_SCHEM", "TABLE_SCHEM"),
-          ColumnDescriptor("REMARKS", "REMARKS")
-        )
-      ),
-      "cursor",
-      null
+    singleRowResultSet(
+      s("TABLE_CAT", "coralogix"),
+      s("TABLE_SCHEM", "coralogix"),
+      s("TABLE_NAME", "logs"),
+      s("TABLE_TYPE", "TABLE"),
+      s("REMARKS"),
+      s("TYPE_CAT"),
+      s("TYPE_SCHEM"),
+      s("TYPE_NAME"),
+      s("SELF_REFERENCING_COL_NAME"),
+      s("REF_GENERATION")
     )
 
   override def getSchemas: ResultSet =
-    ResultSetImpl(
-      QueryResponse(
-        List(
-          Row(
-            List(
-              str("Coralogix"),
-              str("Coralogix")
-            )
-          )
-        ),
-        List(
-          ColumnDescriptor("TABLE_SCHEM", "TABLE_SCHEM"),
-          ColumnDescriptor("TABLE_CATALOG", "TABLE_CATALOG")
-        )
-      ),
-      "cursor",
-      null
+    singleRowResultSet(
+      s("TABLE_SCHEM", "coralogix"),
+      s("TABLE_CATALOG", "coralogix")
     )
 
   override def getCatalogs: ResultSet =
-    ResultSetImpl(
-      QueryResponse(
-        List(
-          Row(
-            List(
-              str("Coralogix"),
-              str("Coralogix"),
-              str("Coralogix"),
-              str("text"),
-              num(1),
-              num(10),
-              num(10),
-              num(10),
-              str("Coralogix"),
-              str("Coralogix"),
-              num(10),
-              str("Coralogix")
-            )
-          )
-        ),
-        List(
-          ColumnDescriptor("TABLE_CAT", "TABLE_CAT"),
-          ColumnDescriptor("TABLE_SCHEM", "TABLE_SCHEM"),
-          ColumnDescriptor("TABLE_NAME", "TABLE_NAME"),
-          ColumnDescriptor("COLUMN_NAME", "COLUMN_NAME"),
-          ColumnDescriptor("DATA_TYPE", "DATA_TYPE"),
-          ColumnDescriptor("COLUMN_SIZE", "COLUMN_SIZE"),
-          ColumnDescriptor("DECIMAL_DIGITS", "DECIMAL_DIGITS"),
-          ColumnDescriptor("NUM_PREC_RADIX", "NUM_PREC_RADIX"),
-          ColumnDescriptor("COLUMN_USAGE", "COLUMN_USAGE"),
-          ColumnDescriptor("REMARKS", "REMARKS"),
-          ColumnDescriptor("CHAR_OCTET_LENGTH", "CHAR_OCTET_LENGTH"),
-          ColumnDescriptor("IS_NULLABLE", "IS_NULLABLE")
-        )
-      ),
-      "cursor",
-      null
+    singleRowResultSet(
+      s("TABLE_CAT", "coralogix")
     )
 
-  override def getTableTypes: ResultSet = unsupported
+  override def getTableTypes: ResultSet =
+    singleRowResultSet(
+      s("TABLE_TYPE", "TABLE")
+    )
 
   override def getColumns(
     catalog: String,
@@ -371,16 +400,90 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
     tableNamePattern: String,
     columnNamePattern: String
   ): ResultSet =
-    ResultSetImpl(
-      QueryResponse(
-        Nil,
-        List(
-          ColumnDescriptor("TABLE_SCHEM", "TABLE_SCHEM"),
-          ColumnDescriptor("TABLE_CATALOG", "TABLE_CATALOG")
+    rt.unsafeRunTask(
+      SqlQueryServiceClient
+        .withTimeout(queryTimeout.seconds)
+        .schema(SchemaRequest())
+        .map(response =>
+          ResultSetImpl(
+            QueryResponse(
+              response.columnDescriptors.zipWithIndex.map {
+                case (column, index) =>
+                  val columnType = ElasticsearchType.byName(column.`type`.name)
+                  Row(
+                    List(
+                      str("coralogix"), // TABLE_CAT
+                      str("coralogix"), // TABLE_SCHEM
+                      str("logs"), // TABLE_NAME
+                      str(column.name), // COLUMN_NAME
+                      num(columnType.jdbcType.getVendorTypeNumber), // DATA_TYPE
+                      str(columnType.jdbcType.getName), // TYPE_NAME
+                      `null`, // COLUMN_SIZE
+                      `null`, // BUFFER_LENGTH
+                      `null`, // DECIMAL_DIGITS
+                      `null`, // NUM_PREC_RADIX
+                      num(DatabaseMetaData.columnNullableUnknown), // NULLABLE
+                      `null`, // REMARKS
+                      `null`, // COLUMN_DEF
+                      `null`, // SQL_DATA_TYPE
+                      `null`, // SQL_DATETIME_SUB
+                      `null`, // CHAR_OCTET_LENGTH
+                      num(index + 1), // ORDINAL_POSITION
+                      str(""), // IS_NULLABLE
+                      `null`, // SCOPE_CATALOG
+                      `null`, // SCOPE_SCHEMA
+                      `null`, // SCOPE_TABLE
+                      `null`, // SOURCE_DATA_TYPE
+                      str("NO"), // IS_AUTOINCREMENT
+                      str("NO") // IS_GENERATEDCOLUMN
+                    )
+                  )
+              },
+              List(
+                cd("TABLE_CAT"),
+                cd("TABLE_SCHEM"),
+                cd("TABLE_NAME"),
+                cd("COLUMN_NAME"),
+                cd("DATA_TYPE", Type.INTEGER),
+                cd("TYPE_NAME"),
+                cd("COLUMN_SIZE", Type.INTEGER),
+                cd("BUFFER_LENGTH", Type.INTEGER),
+                cd("DECIMAL_DIGITS"),
+                cd("NUM_PREC_RADIX"),
+                cd("NULLABLE"),
+                cd("REMARKS"),
+                cd("COLUMN_DEF"),
+                cd("SQL_DATA_TYPE"),
+                cd("SQL_DATETIME_SUB"),
+                cd("CHAR_OCTET_LENGTH"),
+                cd("ORDINAL_POSITION"),
+                cd("IS_NULLABLE"),
+                cd("SCOPE_CATALOG"),
+                cd("SCOPE_SCHEMA"),
+                cd("SCOPE_TABLE"),
+                cd("SOURCE_DATA_TYPE"),
+                cd("IS_AUTOINCREMENT"),
+                cd("IS_GENERATEDCOLUMN")
+              )
+            ),
+            "cursor",
+            null
+          )
         )
-      ),
-      "cursor",
-      null
+        .foldCauseM(
+          _.foldLeft(ZIO.fail(new SQLException("Empty cause received"))) {
+            case (_, Cause.Interrupt(_)) =>
+              ZIO.fail(new SQLException("Introspection cancelled due to client request"))
+            case (_, Cause.Fail(status)) =>
+              ZIO.fail(
+                new SQLException(
+                  s"Introspection failed: ${Option(status.getDescription).getOrElse(status.getCode.name)}"
+                )
+              )
+            case (_, Cause.Die(e)) => ZIO.fail(new SQLException(e))
+          },
+          ZIO.succeed(_)
+        )
     )
 
   override def getColumnPrivileges(
@@ -409,10 +512,32 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
     unsupported
 
   override def getPrimaryKeys(catalog: String, schema: String, table: String): ResultSet =
-    unsupported
+    emptyResultSet(
+      e("TABLE_CAT"),
+      e("TABLE_SCHEM"),
+      e("TABLE_NAME"),
+      e("COLUMN_NAME"),
+      e("KEY_SEQ", Type.SHORT),
+      e("PK_NAME")
+    )
 
   override def getImportedKeys(catalog: String, schema: String, table: String): ResultSet =
-    unsupported
+    emptyResultSet(
+      e("PKTABLE_CAT"),
+      e("PKTABLE_SCHEM"),
+      e("PKTABLE_NAME"),
+      e("PKCOLUMN_NAME"),
+      e("FKTABLE_CAT"),
+      e("FKTABLE_SCHEM"),
+      e("FKTABLE_NAME"),
+      e("FKCOLUMN_NAME"),
+      e("KEY_SEQ", Type.SHORT),
+      e("UPDATE_RULE", Type.SHORT),
+      e("DELETE_RULE", Type.SHORT),
+      e("FK_NAME"),
+      e("PK_NAME"),
+      e("DEFERRABILITY", Type.SHORT)
+    )
 
   override def getExportedKeys(catalog: String, schema: String, table: String): ResultSet =
     unsupported
@@ -427,9 +552,6 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
   ): ResultSet = unsupported
 
   override def getTypeInfo: ResultSet = {
-    def cd(name: String) =
-      ColumnDescriptor(name, name)
-
     val columnDescriptors = List(
       cd("TYPE_NAME"),
       cd("DATA_TYPE"),
@@ -494,7 +616,21 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
     unique: Boolean,
     approximate: Boolean
   ): ResultSet =
-    unsupported
+    emptyResultSet(
+      e("TYPE_CAT"),
+      e("TYPE_SCHEM"),
+      e("TYPE_NAME"),
+      e("NON_UNIQUE", Type.BOOLEAN),
+      e("INDEX_QUALIFIER"),
+      e("INDEX_NAME"),
+      e("TYPE", Type.SHORT),
+      e("ORDINAL_POSITION", Type.SHORT),
+      e("COLUMN_NAME"),
+      e("ASC_OR_DESC"),
+      e("CARDINALITY", Type.LONG),
+      e("PAGES", Type.LONG),
+      e("FILTER_CONDITION")
+    )
 
   override def supportsResultSetType(`type`: Int): Boolean =
     `type` == ResultSet.TYPE_FORWARD_ONLY
@@ -544,20 +680,13 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
     schemaPattern: String,
     typeNamePattern: String
   ): ResultSet =
-    ResultSetImpl(
-      QueryResponse(
-        Nil,
-        List(
-          ColumnDescriptor("TYPE_CAT", "TYPE_CAT"),
-          ColumnDescriptor("TYPE_SCHEM", "TYPE_SCHEM"),
-          ColumnDescriptor("TYPE_NAME", "TYPE_NAME"),
-          ColumnDescriptor("SUPERTYPE_CAT", "SUPERTYPE_CAT"),
-          ColumnDescriptor("SUPERTYPE_SCHEM", "SUPERTYPE_SCHEM"),
-          ColumnDescriptor("SUPERTYPE_NAME", "SUPERTYPE_NAME")
-        )
-      ),
-      "cursor",
-      null
+    emptyResultSet(
+      e("TYPE_CAT"),
+      e("TYPE_SCHEM"),
+      e("TYPE_NAME"),
+      e("SUPERTYPE_CAT"),
+      e("SUPERTYPE_SCHEM"),
+      e("SUPERTYPE_NAME")
     )
 
   override def getSuperTables(
@@ -565,18 +694,11 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
     schemaPattern: String,
     tableNamePattern: String
   ): ResultSet =
-    ResultSetImpl(
-      QueryResponse(
-        Nil,
-        List(
-          ColumnDescriptor("TABLE_CAT", "TABLE_CAT"),
-          ColumnDescriptor("TABLE_SCHEM", "TABLE_SCHEM"),
-          ColumnDescriptor("TABLE_NAME", "TABLE_NAME"),
-          ColumnDescriptor("SUPERTABLE_NAME", "SUPERTABLE_NAME")
-        )
-      ),
-      "cursor",
-      null
+    emptyResultSet(
+      e("TABLE_CAT"),
+      e("TABLE_SCHEM"),
+      e("TABLE_NAME"),
+      e("SUPERTABLE_NAME")
     )
 
   override def getAttributes(
@@ -620,7 +742,15 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
     catalog: String,
     schemaPattern: String,
     functionNamePattern: String
-  ): ResultSet = unsupported
+  ): ResultSet =
+    emptyResultSet(
+      e("FUNCTION_CAT"),
+      e("FUNCTION_SCHEM"),
+      e("FUNCTION_NAME"),
+      e("REMARKS"),
+      e("FUNCTION_TYPE", Type.SHORT),
+      e("SPECIFIC_NAME")
+    )
 
   override def getFunctionColumns(
     catalog: String,
@@ -628,7 +758,25 @@ class DatabaseMetaDataImpl(connection: ConnectionImpl) extends DatabaseMetaData 
     functionNamePattern: String,
     columnNamePattern: String
   ): ResultSet =
-    unsupported
+    emptyResultSet(
+      e("FUNCTION_CAT"),
+      e("FUNCTION_SCHEM"),
+      e("FUNCTION_NAME"),
+      e("COLUMN_NAME"),
+      e("COLUMN_TYPE", Type.SHORT),
+      e("DATA_TYPE", Type.INTEGER),
+      e("TYPE_NAME"),
+      e("PRECISION", Type.INTEGER),
+      e("LENGTH", Type.INTEGER),
+      e("SCALE", Type.SHORT),
+      e("RADIX", Type.SHORT),
+      e("NULLABLE", Type.SHORT),
+      e("REMARKS"),
+      e("CHAR_OCTET_LENGTH", Type.INTEGER),
+      e("ORDINAL_POSITION", Type.INTEGER),
+      e("IS_NULLABLE"),
+      e("SPECIFIC_NAME")
+    );
 
   override def getPseudoColumns(
     catalog: String,
