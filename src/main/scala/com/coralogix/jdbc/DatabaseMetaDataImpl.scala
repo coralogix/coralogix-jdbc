@@ -6,6 +6,7 @@ import com.coralogix.sql.grpc.external.v1.SqlQueryService.{
   ColumnDescriptor,
   QueryResponse,
   Row,
+  SchemaRequest,
   Type
 }
 import com.google.protobuf.empty.Empty
@@ -402,7 +403,7 @@ class DatabaseMetaDataImpl(
     rt.unsafeRunTask(
       SqlQueryServiceClient
         .withTimeout(queryTimeout.seconds)
-        .schema(Empty())
+        .schema(SchemaRequest())
         .map(response =>
           ResultSetImpl(
             QueryResponse(

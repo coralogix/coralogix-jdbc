@@ -1,23 +1,15 @@
 package com.coralogix.jdbc
 
-import com.coralogix.sql.grpc.external.v1.SqlQueryService.{
-  ColumnDescriptor,
-  QueryParameter,
-  QueryRequest,
-  QueryResponse,
-  Row,
-  SchemaResponse
-}
+import com.coralogix.sql.grpc.external.v1.SqlQueryService.{ColumnDescriptor, QueryParameter, QueryRequest, QueryResponse, Row, SchemaRequest, SchemaResponse}
 import com.coralogix.sql.grpc.external.v1.SqlQueryService.ZioSqlQueryService.SqlQueryServiceClient
-import com.google.protobuf.empty.Empty
-import com.google.protobuf.struct.{ Struct, Value }
-import io.grpc.{ CallOptions, Status }
+import com.google.protobuf.struct.Value
+import io.grpc.{CallOptions, Status}
 import scalapb.zio_grpc.SafeMetadata
 import zio.test.Assertion.equalTo
-import zio.{ IO, Layer, Task, ZIO, ZLayer, ZManaged }
-import zio.test.{ assert, suite, testM, DefaultRunnableSpec }
+import zio.{IO, Layer, Task, ZIO, ZLayer, ZManaged}
+import zio.test.{DefaultRunnableSpec, assert, suite, testM}
 
-import java.sql.{ ResultSet, Timestamp }
+import java.sql.{ResultSet, Timestamp}
 
 object PreparedStatementTest extends DefaultRunnableSpec {
 
@@ -42,7 +34,7 @@ object PreparedStatementTest extends DefaultRunnableSpec {
       f: CallOptions => IO[Status, CallOptions]
     ): SqlQueryServiceClient.ZService[R, Context] = Service(req, res)
 
-    override def schema(request: Empty): ZIO[R with Context, Status, SchemaResponse] =
+    override def schema(request: SchemaRequest): ZIO[R with Context, Status, SchemaResponse] =
       ZIO.fail(Status.NOT_FOUND)
   }
 

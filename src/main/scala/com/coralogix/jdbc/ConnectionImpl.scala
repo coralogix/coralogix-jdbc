@@ -49,7 +49,8 @@ class ConnectionImpl(rt: Runtime[SqlQueryServiceClient], val url: String, queryT
       throw new SQLException(s"No catalog: $catalog")
 
   override def setReadOnly(readOnly: Boolean): Unit =
-    if (!readOnly) throw new SQLNonTransientException("Read-write connection not supported")
+    if (!readOnly)
+      throw new SQLNonTransientException(s"Read-write connection not supported")
 
   override def isReadOnly: Boolean = true
 
