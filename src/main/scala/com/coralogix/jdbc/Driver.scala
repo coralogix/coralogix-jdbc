@@ -5,10 +5,10 @@ import io.grpc.{ ManagedChannelBuilder, Metadata }
 import scalapb.zio_grpc.{ SafeMetadata, ZManagedChannel }
 import zio._
 
-import java.sql.{ Connection, DriverPropertyInfo, SQLException }
+import java.sql.{ Connection, DriverPropertyInfo, SQLException, SQLFeatureNotSupportedException }
 import java.util.Properties
 
-object DriverLogic {
+class Driver extends java.sql.Driver {
 
   val URL_PREFIX = "jdbc:coralogix://"
 
@@ -103,7 +103,15 @@ object DriverLogic {
   val timeoutProperty =
     property("timeout", false, "Request timeout in seconds.\nDefault: 30")
 
-  def getPropertyInfo(): Array[DriverPropertyInfo] =
+  def getPropertyInfo(url: String, info: Properties): Array[DriverPropertyInfo] =
     Array(apiKeyProperty, tlsProperty, timeoutProperty)
 
+  def getMajorVersion(): Int = 1
+
+  def getMinorVersion(): Int = 0
+
+  def getParentLogger(): java.util.logging.Logger =
+    throw new SQLFeatureNotSupportedException()
+
+  def jdbcCompliant(): Boolean = false
 }
