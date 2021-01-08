@@ -24,7 +24,7 @@ We will show you how to do it for three popular database tools. Procedure with o
    `jdbc:coralogix://grpc-api.coralogix.com` for **Europe** or
    `jdbc:coralogix://grpc-api.app.coralogix.in` for **India**
 9. In `Advanced` tab input your `apiKey`. You will get it from Coralogix dashboard
-   `Settings` -> `API Access` tab -> `Logs API Key`.
+   `Settings` -> `API Access` tab -> `Logs API Key`
 10. Click on `Apply` then `OK`
 
 ## DBeaver
@@ -42,7 +42,7 @@ We will show you how to do it for three popular database tools. Procedure with o
    `jdbc:coralogix://grpc-api.coralogix.com` for **Europe** or
    `jdbc:coralogix://grpc-api.app.coralogix.in` for **India**
 10. Click on `Driver properties` tab input your `apiKey`. You will get it from Coralogix dashboard
-    `Settings` -> `API Access` tab -> `Logs API Key`.
+    `Settings` -> `API Access` tab -> `Logs API Key`
 11. In the `Main` tab click on `Connection Details` button and choose better `Connection Name` e.g. `Coralogix`
 11. Click on `Finish`
 12. `Coralogix` connection in `Database Navigator` was created
