@@ -1,5 +1,7 @@
 ThisBuild / scalaVersion := "2.13.4"
 
+Global / protodepUseHttps := true
+
 inThisBuild(
   List(
     organization := "com.coralogix",
