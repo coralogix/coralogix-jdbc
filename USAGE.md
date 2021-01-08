@@ -4,7 +4,7 @@ Now you can investigate logs in our favorite database tool.
 
 These are the steps you need to do:
 
-1. Download the latest driver from here - [coralogix-jdbc-0.2.jar](https://repo1.maven.org/maven2/com/coralogix/coralogix-jdbc/0.2/coralogix-jdbc-0.2.jar)
+1. Download the latest driver - [coralogix-jdbc-0.2.jar](https://repo1.maven.org/maven2/com/coralogix/coralogix-jdbc/0.2/coralogix-jdbc-0.2.jar)
 2. Install driver
 3. Create datasource
 4. Test it with `select * from logs`
