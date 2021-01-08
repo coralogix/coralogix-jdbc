@@ -44,8 +44,7 @@ class ConnectionImpl(rt: Runtime[SqlQueryServiceClient], val url: String, queryT
   override def getCatalog: String = "coralogix"
 
   override def setCatalog(catalog: String): Unit =
-    if (catalog == "coralogix") ()
-    else
+    if (catalog != "coralogix")
       throw new SQLException(s"No catalog: $catalog")
 
   override def setReadOnly(readOnly: Boolean): Unit =
