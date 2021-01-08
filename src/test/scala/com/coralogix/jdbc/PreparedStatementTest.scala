@@ -1,15 +1,23 @@
 package com.coralogix.jdbc
 
-import com.coralogix.sql.grpc.external.v1.SqlQueryService.{ColumnDescriptor, QueryParameter, QueryRequest, QueryResponse, Row, SchemaRequest, SchemaResponse}
+import com.coralogix.sql.grpc.external.v1.SqlQueryService.{
+  ColumnDescriptor,
+  QueryParameter,
+  QueryRequest,
+  QueryResponse,
+  Row,
+  SchemaRequest,
+  SchemaResponse
+}
 import com.coralogix.sql.grpc.external.v1.SqlQueryService.ZioSqlQueryService.SqlQueryServiceClient
 import com.google.protobuf.struct.Value
-import io.grpc.{CallOptions, Status}
+import io.grpc.{ CallOptions, Status }
 import scalapb.zio_grpc.SafeMetadata
 import zio.test.Assertion.equalTo
-import zio.{IO, Layer, Task, ZIO, ZLayer, ZManaged}
-import zio.test.{DefaultRunnableSpec, assert, suite, testM}
+import zio.{ IO, Layer, Task, ZIO, ZLayer, ZManaged }
+import zio.test.{ assert, suite, testM, DefaultRunnableSpec }
 
-import java.sql.{ResultSet, Timestamp}
+import java.sql.{ ResultSet, Timestamp }
 
 object PreparedStatementTest extends DefaultRunnableSpec {
 
