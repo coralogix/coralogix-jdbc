@@ -48,3 +48,25 @@ We will show you how to do it for three popular database tools. Procedure with o
 12. `Coralogix` connection in `Database Navigator` was created
 
 ## Tableau
+
+1. Download the latest driver
+2. Place the .jar files in the folder for your operating system. (You need to create the folder if it doesn't already exist.)
+   
+   | OS      | Path                             |
+   | ------- | -------------------------------- |
+   | Windows | C:\Program Files\Tableau\Drivers |
+   | Mac     | ~/Library/Tableau/Drivers        |
+   | Linux   | /opt/tableau/tableau_driver/jdbc |
+3. Create file `coralogix.props` and add there line with your `apiKey`.
+   You will get it from Coralogix dashboard `Settings` -> `API Access` tab -> `Logs API Key`
+   ```
+   apiKey=<YOUR API KEY>
+   ```
+4. On the main screen in `To a Server` section choose `Other Databases (JDBC)`
+5. Set `URL` to
+   `jdbc:coralogix://grpc-api.coralogix.com` for **Europe** or
+   `jdbc:coralogix://grpc-api.app.coralogix.in` for **India**
+   Set `Dialect` to `MySQL`
+   Leave `Username` and `Password` blank
+   Click on `Browse` next `Properties file` and choose `coralogix.props` you created
+6. Click on `Sign In`
