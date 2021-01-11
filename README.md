@@ -2,10 +2,20 @@
 
 JDBC driver connecting to es-sql service via gRPC
 
-## Usage
-Point Jbdc url to es-sql service
+# Usage
+
+For using this driver with various db tools [click here](USAGE.md)
+
+# For developers
+Point JDBC url to es-sql service 
+
+for **Europe**
 ```
-"jdbc:coralogix://localhost:9090"
+jdbc:coralogix://grpc-api.coralogix.com 
+```
+for **India**
+```
+jdbc:coralogix://grpc-api.app.coralogix.in
 ```
 ## Properties
 | Property      | Description                      | Required | Default |

@@ -717,7 +717,7 @@ class DatabaseMetaDataImpl(
 
   override def getDatabaseMinorVersion: Int = 0
 
-  override def getJDBCMajorVersion: Int = 0
+  override def getJDBCMajorVersion: Int = 4
 
   override def getJDBCMinorVersion: Int = 0
 

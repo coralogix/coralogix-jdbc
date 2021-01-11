@@ -50,7 +50,7 @@ object PreparedStatementTest extends DefaultRunnableSpec {
     ZLayer.succeed(Service(req, res))
 
   def connection(req: QueryRequest, res: QueryResponse) =
-    ZManaged.makeEffect(DriverLogic.connect(client(req, res), "", 30))(_.close)
+    ZManaged.makeEffect(new Driver().connect(client(req, res), "", 30))(_.close)
 
   def resultFrom[A](rs: ResultSet, f: ResultSet => A): Task[List[A]] =
     Task {

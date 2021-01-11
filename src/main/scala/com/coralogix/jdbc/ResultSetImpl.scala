@@ -59,6 +59,17 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
       f
     )
 
+  private def anyValue(value: Kind): AnyRef =
+    value match {
+      case BoolValue(s)   => java.lang.Boolean.valueOf(s)
+      case Empty          => null
+      case ListValue(s)   => s
+      case NullValue(_)   => null
+      case NumberValue(s) => java.lang.Double.valueOf(s)
+      case StringValue(s) => s
+      case StructValue(s) => s
+    }
+
   private def getValueByIndex[A](
     i: Int,
     typeName: String,
@@ -68,7 +79,10 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
     r.rows(currentIndex).values(i - 1).kind match {
       case NullValue(_)          => lastWasNull = true; Right(None)
       case k if f.isDefinedAt(k) => Right(Some(f(k)))
-      case k                     => Left(s"Expected $typeName but got ${k.getClass.getName} at index $i")
+      case k =>
+        Left(
+          s"Expected $typeName but got ${k.getClass.getSimpleName} with value ${anyValue(k).toString} at index $i"
+        )
     }
   }
 
@@ -186,15 +200,7 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
     getValueByIndex(
       columnIndex,
       "UNKNOWN",
-      {
-        case BoolValue(s)   => java.lang.Boolean.valueOf(s)
-        case Empty          => null
-        case ListValue(s)   => s
-        case NullValue(_)   => null
-        case NumberValue(s) => java.lang.Double.valueOf(s)
-        case StringValue(s) => s
-        case StructValue(s) => s
-      }
+      PartialFunction.fromFunction(anyValue)
     ).getOrNull
 
   override def getObject(columnLabel: String): AnyRef =
