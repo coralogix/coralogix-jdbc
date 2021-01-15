@@ -2,6 +2,8 @@
 
 Now you can investigate logs in our favorite database tool.
 
+## Using the driver
+
 These are the steps you need to do:
 
 1. Download the latest driver - [coralogix-jdbc-0.2.jar](https://repo1.maven.org/maven2/com/coralogix/coralogix-jdbc/0.2/coralogix-jdbc-0.2.jar)
@@ -11,7 +13,7 @@ These are the steps you need to do:
 
 We will show you how to do it for three popular database tools. Procedure with other tools should be similar.
 
-## DataGrip
+### DataGrip
 
 1. Download the latest driver
 2. Click on `+` icon in the database menu and choose `Driver`
@@ -27,7 +29,7 @@ We will show you how to do it for three popular database tools. Procedure with o
    `Settings` -> `API Access` tab -> `Logs API Key`
 10. Click on `Apply` then `OK`
 
-## DBeaver
+### DBeaver
 
 1. Download the latest driver
 2. In the menu open `Database` -> `Driver manager` and click on `New` button
@@ -47,7 +49,7 @@ We will show you how to do it for three popular database tools. Procedure with o
 11. Click on `Finish`
 12. `Coralogix` connection in `Database Navigator` was created
 
-## Tableau
+### Tableau
 
 1. Download the latest driver
 2. Place the .jar files in the folder for your operating system. (You need to create the folder if it doesn't already exist.)
@@ -70,3 +72,17 @@ We will show you how to do it for three popular database tools. Procedure with o
    Leave `Username` and `Password` blank
    Click on `Browse` next `Properties file` and choose `coralogix.props` you created
 6. Click on `Sign In`
+
+## Queries
+
+Simplest query:
+```
+SELECT * FROM logs
+```
+
+Also Elasticsearch queries are supported, you can write them in `QUERY` function:
+```
+SELECT * FROM logs 
+  WHERE
+    QUERY('coralogix.metadata.subsystemName:AAA OR coralogix.metadata.subsystemName:BBB');
+```
