@@ -47,7 +47,8 @@ class StatementImpl(
           case (_, Cause.Fail(status)) =>
             ZIO.fail(
               new SQLException(
-                s"Statement failed: ${Option(status.getDescription).getOrElse(status.getCode.name)}"
+                s"Statement failed: ${Option(status.getDescription)
+                  .getOrElse(status.getCode.name)} code: ${status.getCode.name}"
               )
             )
           case (_, Cause.Die(e)) => ZIO.fail(new SQLException(e))

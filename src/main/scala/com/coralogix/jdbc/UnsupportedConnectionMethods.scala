@@ -65,8 +65,6 @@ trait UnsupportedConnectionMethods extends UnsupportedMethods { self: Connection
 
   override def createSQLXML(): SQLXML = unsupported
 
-  override def isValid(timeout: Int): Boolean = unsupported
-
   override def setClientInfo(name: String, value: String): Unit = unsupported
 
   override def setClientInfo(properties: Properties): Unit = unsupported

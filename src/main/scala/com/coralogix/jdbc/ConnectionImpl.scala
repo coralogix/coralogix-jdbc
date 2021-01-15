@@ -53,6 +53,8 @@ class ConnectionImpl(rt: Runtime[SqlQueryServiceClient], val url: String, queryT
 
   override def isReadOnly: Boolean = true
 
+  override def isValid(timeout: Int): Boolean = true
+
   override def getTransactionIsolation: Int =
     Connection.TRANSACTION_NONE
 
