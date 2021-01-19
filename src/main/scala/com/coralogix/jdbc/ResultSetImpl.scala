@@ -1,16 +1,9 @@
 package com.coralogix.jdbc
 
 import com.coralogix.sql.grpc.external.v1.SqlQueryService.QueryResponse
+import com.coralogix.jdbc.Conversions._
 import com.google.protobuf.struct.Value.Kind
-import com.google.protobuf.struct.Value.Kind.{
-  BoolValue,
-  Empty,
-  ListValue,
-  NullValue,
-  NumberValue,
-  StringValue,
-  StructValue
-}
+import com.google.protobuf.struct.Value.Kind.{ BoolValue, NullValue, NumberValue }
 
 import java.sql.{
   Date,
@@ -22,6 +15,7 @@ import java.sql.{
   Time,
   Timestamp
 }
+import java.util.Calendar
 
 case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: StatementImpl)
     extends ResultSet with UnsupportedResultSetMethods {
@@ -59,17 +53,6 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
       f
     )
 
-  private def anyValue(value: Kind): AnyRef =
-    value match {
-      case BoolValue(s)   => java.lang.Boolean.valueOf(s)
-      case Empty          => null
-      case ListValue(s)   => s
-      case NullValue(_)   => null
-      case NumberValue(s) => java.lang.Double.valueOf(s)
-      case StringValue(s) => s
-      case StructValue(s) => s
-    }
-
   private def getValueByIndex[A](
     i: Int,
     typeName: String,
@@ -100,7 +83,7 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
   override def wasNull(): Boolean = lastWasNull
 
   override def getString(columnIndex: Int): String =
-    getValueByIndex(columnIndex, "String", { case StringValue(s) => s }).getOrNull
+    getValueByIndex(columnIndex, "String", stringValue).getOrNull
 
   override def getBoolean(columnIndex: Int): Boolean =
     getValueByIndex(columnIndex, "Boolean", { case BoolValue(s) => s }).getOrDefault(false)
@@ -140,11 +123,18 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
     getValueByIndex(
       columnIndex,
       "Timestamp",
-      { case NumberValue(s) => new Timestamp(s.toLong) }
+      timestampValue
+    ).getOrNull
+
+  override def getTimestamp(columnIndex: Int, cal: Calendar): Timestamp =
+    getValueByIndex(
+      columnIndex,
+      "Timestamp",
+      timestampValue(cal)
     ).getOrNull
 
   override def getString(columnLabel: String): String =
-    getValueByLabel(columnLabel, "String", { case StringValue(s) => s }).getOrNull
+    getValueByLabel(columnLabel, "String", stringValue).getOrNull
 
   override def getBoolean(columnLabel: String): Boolean =
     getValueByLabel(columnLabel, "Boolean", { case BoolValue(s) => s }).getOrDefault(false)
@@ -184,7 +174,14 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
     getValueByLabel(
       columnLabel,
       "Timestamp",
-      { case NumberValue(s) => new Timestamp(s.toLong) }
+      timestampValue
+    ).getOrNull
+
+  override def getTimestamp(columnLabel: String, cal: Calendar): Timestamp =
+    getValueByLabel(
+      columnLabel,
+      "Timestamp",
+      timestampValue(cal)
     ).getOrNull
 
   override def getWarnings: SQLWarning = null
