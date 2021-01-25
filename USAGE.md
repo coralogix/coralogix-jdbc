@@ -39,7 +39,8 @@ We will show you how to do it for three popular database tools. Procedure with o
    `Driver Class` field, click on it
 6. Click on `OK`
 7. Click on `New Database Connection` in the menu (plug with `+` icon)
-8. Type `coralogix` into search box and choose `Coralogix` driver and click on `Next`
+8. Type `coralogix` into search box in the left tab choose `All` 
+   and choose `Coralogix` driver and click on `Next`
 9. Set `JDBC URL` to
    `jdbc:coralogix://grpc-api.coralogix.com` for **Europe** or
    `jdbc:coralogix://grpc-api.app.coralogix.in` for **India**

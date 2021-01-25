@@ -55,7 +55,7 @@ class Driver extends java.sql.Driver {
     )
 
   def getTimeout(properties: Properties): Int =
-    getProperty(properties, timeoutProperty, 30)(
+    getProperty(properties, timeoutProperty, 60)(
       _.toIntOption
         .filter(_ > 0)
         .getOrElse(throw new SQLException("Timeout has to be positive integer."))
@@ -63,13 +63,14 @@ class Driver extends java.sql.Driver {
 
   def connect(url: String, properties: Properties): Connection = {
 
+    val tls = getTls(properties)
+
     val (host, port) =
-      try {
-        val Array(host, portStr) = url.stripPrefix(URL_PREFIX).split(":")
-        val port = portStr.toInt
-        (host, port)
-      } catch {
-        case _: Throwable => throw new SQLException("Error parsing jdbc url")
+      url.stripPrefix(URL_PREFIX).split(":") match {
+        case Array(host, port) =>
+          (host, port.toIntOption.getOrElse(throw new SQLException("Error parsing port jdbc url")))
+        case Array(host) => (host, if (tls) 443 else 80)
+        case _           => throw new SQLException("Error parsing jdbc url, multiple \":\"")
       }
 
     val apiKey = Option(properties.getProperty(apiKeyProperty.name))
@@ -78,7 +79,7 @@ class Driver extends java.sql.Driver {
         throw new SQLException("Please specify apiKey property")
       )
 
-    connect(layer(host, port, apiKey, getTls(properties)), url, getTimeout(properties))
+    connect(layer(host, port, apiKey, tls), url, getTimeout(properties))
   }
 
   def connect(
@@ -101,7 +102,7 @@ class Driver extends java.sql.Driver {
   val apiKeyProperty = property("apiKey", true, "Coralogix api-key")
   val tlsProperty = property("tls", false, "TLS 'true' or 'false'.\nDefault: true")
   val timeoutProperty =
-    property("timeout", false, "Request timeout in seconds.\nDefault: 30")
+    property("timeout", false, "Request timeout in seconds.\nDefault: 60")
 
   def getPropertyInfo(url: String, info: Properties): Array[DriverPropertyInfo] =
     Array(apiKeyProperty, tlsProperty, timeoutProperty)
