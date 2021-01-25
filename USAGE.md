@@ -83,9 +83,64 @@ Simplest query:
 SELECT * FROM logs
 ```
 
-Also Elasticsearch queries are supported, you can write them in `QUERY` function:
+### Log Table
+
+The only supported table at the moment is `log` table. There might be more tables in the future.
+
+You can navigate objects like `coralogix.metadata.subsystemName`.
+
+```
+SELECT text, coralogix.metadata.subsystemName FROM logs
+```
+
+| Column  | Type                             | Description |
+| ------- | -------------------------------- | ----------- |
+| Windows | C:\Program Files\Tableau\Drivers |
+| Mac     | ~/Library/Tableau/Drivers        |
+| Linux   | /opt/tableau/tableau_driver/jdbc |
+
+//FIXME add table name rewriting exmpales too
+
+
+## Fulltext search
+
+### Match
+To search for text in a single field, use MATCHQUERY or MATCH_QUERY functions.
+
+Pass in your search query and the field name that you want to search against.
+```
+SELECT text, coralogix.metadata.severity
+FROM logs
+WHERE MATCH_QUERY(text, 'healthcheck')
+```
+Alternate syntax:
+```
+SELECT text, coralogix.metadata.severity
+FROM logs
+WHERE text = MATCH_QUERY('healthcheck')
+```
+
+### Multi match
+To search for text in multiple fields, use MULTI_MATCH, MULTIMATCH, or MULTIMATCHQUERY functions.
+
+For example, search for Dale in either the text or lastname fields:
+
+```
+SELECT firstname, lastname
+FROM accounts
+WHERE MULTI_MATCH('query'='Dale', 'fields'='*name')
+```
+
+### Elasticsearch queries
+
+Also, Elasticsearch queries are supported, you can write them in `QUERY` function:
 ```
 SELECT * FROM logs 
   WHERE
     QUERY('coralogix.metadata.subsystemName:AAA OR coralogix.metadata.subsystemName:BBB');
 ```
+
+
+
+Recommended way to query (e.g. avoid select *)
+Unusual features (like what you've added about QUERY_STRING but go over open distro docs and add more)
