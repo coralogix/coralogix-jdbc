@@ -83,6 +83,9 @@ Simplest query:
 SELECT * FROM logs
 ```
 
+Number of columns in logs table is dynamic and can ago into few hundreds, so it is better to ask
+for specific columns.
+
 ### Log Table
 
 The only supported table at the moment is `log` table. There might be more tables in the future.
@@ -104,10 +107,18 @@ SELECT text, coralogix.metadata.subsystemName FROM logs
 
 ## Fulltext search
 
-### Match
-To search for text in a single field, use MATCHQUERY or MATCH_QUERY functions.
+The Coralogix SQL support is based on the 
+[OpenDistro SQL support](https://opendistro.github.io/for-elasticsearch-docs/docs/sql/sql-full-text/).
 
-Pass in your search query and the field name that you want to search against.
+One of the caveat of full-text search is that is works `text` indices but does not work for `keyword` indices.
+
+Following are examples of full-text search operators that are supported:
+
+### Match
+
+If you want to search for text in a single field, use MATCHQUERY or MATCH_QUERY functions.
+
+First parameter is the field name second one is the search query.
 ```
 SELECT text, coralogix.metadata.severity
 FROM logs
@@ -121,26 +132,49 @@ WHERE text = MATCH_QUERY('healthcheck')
 ```
 
 ### Multi match
-To search for text in multiple fields, use MULTI_MATCH, MULTIMATCH, or MULTIMATCHQUERY functions.
+If you want to search for text in multiple fields, use MULTI_MATCH, MULTIMATCH, or MULTIMATCHQUERY functions.
 
-For example, search for Dale in either the text or lastname fields:
+In this example, we search for `health` in either the text or lastname fields:
 
 ```
-SELECT firstname, lastname
-FROM accounts
-WHERE MULTI_MATCH('query'='Dale', 'fields'='*name')
+SELECT kubernetes.labels.app, kubernetes.labels.controller-uid
+FROM logs
+WHERE MULTI_MATCH('query'='prod', 'fields'='*labels*');
 ```
 
 ### Elasticsearch queries
 
-Also, Elasticsearch queries are supported, you can write them in `QUERY` function:
+Elasticsearch queries are supported, you can write them in `QUERY` function:
 ```
 SELECT * FROM logs 
   WHERE
     QUERY('coralogix.metadata.subsystemName:AAA OR coralogix.metadata.subsystemName:BBB');
 ```
 
+### Match phrase
 
+If you want to search for exact phrases, use MATCHPHRASE, MATCH_PHRASE, or MATCHPHRASEQUERY functions.
 
-Recommended way to query (e.g. avoid select *)
-Unusual features (like what you've added about QUERY_STRING but go over open distro docs and add more)
+```
+SELECT text, coralogix.metadata.severity 
+FROM logs
+WHERE 
+   MATCH_PHRASE(text, 'DELETE FROM templates')
+```
+
+<!--
+### Score query
+
+You can get relevance score along with every matching document, by using SCORE, SCOREQUERY, or SCORE_QUERY functions.
+
+The first argument is the MATCH_QUERY expression. The second argument is a floating point number to boost the score 
+(if not set default value is 1.0).
+
+```
+SELECT text, kubernetes.labels.app, _score
+FROM logs
+WHERE SCORE(MATCH_QUERY(text, '_updateTemplates'), 2) OR
+SCORE(MATCH_QUERY(kubernetes.labels.app, 'prod'), 10)
+ORDER BY _score desc
+```
+-->
