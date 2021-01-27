@@ -279,8 +279,4 @@ trait UnsupportedResultSetMethods extends UnsupportedMethods { self: ResultSetIm
   override def getTime(columnIndex: Int, cal: Calendar): Time = unsupported
 
   override def getTime(columnLabel: String, cal: Calendar): Time = unsupported
-
-  override def getTimestamp(columnIndex: Int, cal: Calendar): Timestamp = unsupported
-
-  override def getTimestamp(columnLabel: String, cal: Calendar): Timestamp = unsupported
 }

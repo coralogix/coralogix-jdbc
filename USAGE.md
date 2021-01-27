@@ -60,19 +60,21 @@ We will show you how to do it for three popular database tools. Procedure with o
    | Windows | C:\Program Files\Tableau\Drivers |
    | Mac     | ~/Library/Tableau/Drivers        |
    | Linux   | /opt/tableau/tableau_driver/jdbc |
-3. Create file `coralogix.props` and add there line with your `apiKey`.
+3. Copy the [coralogix.tdc](coralogix.tdc) file to `~/Documents/My Tableau Repository/Datasources`
+   For more details consult [Tableau documentation](https://kb.tableau.com/articles/howto/using-a-tdc-file-with-tableau-server)
+4. Create a file `coralogix.properties` and add an entry with your `apiKey`.
    You will get it from Coralogix dashboard `Settings` -> `API Access` tab -> `Logs API Key`
    ```
    apiKey=<YOUR API KEY>
    ```
-4. On the main screen in `To a Server` section choose `Other Databases (JDBC)`
-5. Set `URL` to
+5. On the main screen in `To a Server` section choose `Other Databases (JDBC)`
+6. Set `URL` to
    `jdbc:coralogix://grpc-api.coralogix.com` for **Europe** or
    `jdbc:coralogix://grpc-api.app.coralogix.in` for **India**
    Set `Dialect` to `MySQL`
    Leave `Username` and `Password` blank
    Click on `Browse` next `Properties file` and choose `coralogix.props` you created
-6. Click on `Sign In`
+7. Click on `Sign In`
 
 ## Queries
 
