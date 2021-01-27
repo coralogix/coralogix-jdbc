@@ -60,9 +60,9 @@ We will show you how to do it for three popular database tools. Procedure with o
    | Windows | C:\Program Files\Tableau\Drivers |
    | Mac     | ~/Library/Tableau/Drivers        |
    | Linux   | /opt/tableau/tableau_driver/jdbc |
-3. Copy [coralogix.tdc](coralogix.tdc) file in `~/Documents/My Tableau Repository/Datasources`
+3. Copy the [coralogix.tdc](coralogix.tdc) file to `~/Documents/My Tableau Repository/Datasources`
    For more details consult [Tableau documentation](https://kb.tableau.com/articles/howto/using-a-tdc-file-with-tableau-server)
-4. Create file `coralogix.properties` and add there line with your `apiKey`.
+4. Create a file `coralogix.properties` and add an entry with your `apiKey`.
    You will get it from Coralogix dashboard `Settings` -> `API Access` tab -> `Logs API Key`
    ```
    apiKey=<YOUR API KEY>
