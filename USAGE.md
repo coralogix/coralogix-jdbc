@@ -96,16 +96,27 @@ You can navigate objects like `coralogix.metadata.subsystemName`.
 SELECT text, coralogix.metadata.subsystemName FROM logs
 ```
 
-
-<!-- FIXME I would like to add standard columns, what are they and also metion nonstandard one
+This list shows the standard columns, there probably will be more columns, depending on your logs.
 
 | Column  | Type                             | Description |
-| ------- | -------------------------------- | ----------- |
-|  | |
-|  | |
-|  | |
-
--->
+| ---------------------------------- | -------------------------------- | ----------- |
+| coralogix.branchId                 | VARCHAR |
+| coralogix.jsonUuid                 | VARCHAR |
+| coralogix.logId                    | VARCHAR |
+| coralogix.metadata.applicationName | VARCHAR |
+| coralogix.metadata.category        | VARCHAR |
+| coralogix.metadata.className       | VARCHAR |
+| coralogix.metadata.companyId       | VARCHAR |
+| coralogix.metadata.computerName    | VARCHAR |
+| coralogix.metadata.ipAddress       | VARCHAR |
+| coralogix.metadata.methodName      | VARCHAR |
+| coralogix.metadata.processName     | VARCHAR |
+| coralogix.metadata.sdkId           | VARCHAR |
+| coralogix.metadata.severity        | VARCHAR |
+| coralogix.metadata.subsystemName   | VARCHAR |
+| coralogix.metadata.threadId        | VARCHAR |
+| coralogix.templateId               | VARCHAR |
+| coralogix.timestamp                | TIMESTAMP |
 
 To make common queries easier you can select also from table
 ```
