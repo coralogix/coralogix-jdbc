@@ -53,7 +53,7 @@ object Conversions {
       formatter.parseBest(s, OffsetDateTime.from(_), LocalDateTime.from(_), LocalDate.from(_))
     ).toOption.map({
       case a: OffsetDateTime => a.toInstant
-      case a: LocalDateTime  => a.toInstant(ZoneOffset.of(zone.getId))
+      case a: LocalDateTime  => a.toInstant(zone.getRules.getOffset(a))
       case a: LocalDate      => a.atStartOfDay(zone).toInstant
     })
 
