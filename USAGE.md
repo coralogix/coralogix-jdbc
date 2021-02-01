@@ -6,7 +6,7 @@ Now you can investigate logs in our favorite database tool.
 
 These are the steps you need to do:
 
-1. Download the latest driver - [coralogix-jdbc-0.2.jar](https://repo1.maven.org/maven2/com/coralogix/coralogix-jdbc/0.2/coralogix-jdbc-0.2.jar)
+1. Download the latest driver - [coralogix-jdbc-xxx.jar](https://search.maven.org/remote_content?g=com.coralogix&a=coralogix-jdbc&v=LATEST)
 2. Install driver
 3. Create datasource
 4. Test it with `select * from logs`
@@ -83,9 +83,123 @@ Simplest query:
 SELECT * FROM logs
 ```
 
-Also Elasticsearch queries are supported, you can write them in `QUERY` function:
+Number of columns in logs table is dynamic and can ago into few hundreds, so it is better to ask
+for specific columns.
+
+### Log Table
+
+The only supported table at the moment is `log` table. There might be more tables in the future.
+
+You can navigate objects like `coralogix.metadata.subsystemName`.
+
+```
+SELECT text, coralogix.metadata.subsystemName FROM logs
+```
+
+This list shows the standard columns, there probably will be more columns, depending on your logs.
+
+| Column  | Type                             | Description |
+| ---------------------------------- | -------------------------------- | ----------- |
+| coralogix.branchId                 | VARCHAR |
+| coralogix.jsonUuid                 | VARCHAR |
+| coralogix.logId                    | VARCHAR |
+| coralogix.metadata.applicationName | VARCHAR |
+| coralogix.metadata.category        | VARCHAR |
+| coralogix.metadata.className       | VARCHAR |
+| coralogix.metadata.companyId       | VARCHAR |
+| coralogix.metadata.computerName    | VARCHAR |
+| coralogix.metadata.ipAddress       | VARCHAR |
+| coralogix.metadata.methodName      | VARCHAR |
+| coralogix.metadata.processName     | VARCHAR |
+| coralogix.metadata.sdkId           | VARCHAR |
+| coralogix.metadata.severity        | VARCHAR |
+| coralogix.metadata.subsystemName   | VARCHAR |
+| coralogix.metadata.threadId        | VARCHAR |
+| coralogix.templateId               | VARCHAR |
+| coralogix.timestamp                | TIMESTAMP |
+
+To make common queries easier you can select also from table
+```
+SELECT * FROM logs.<appName>.<subsystem>
+```
+and query will be translated to
+```
+SELECT * FROM logs WHERE
+coralogix.metadata.applicationName = <appName> AND
+coralogix.metadata.subsystemName = <subsystem>
+```
+
+
+## Fulltext search
+
+The Coralogix SQL support is based on the 
+[OpenDistro SQL support](https://opendistro.github.io/for-elasticsearch-docs/docs/sql/sql-full-text/).
+
+One of the caveat of full-text search is that is works `text` indices but does not work for `keyword` indices.
+
+Following are examples of full-text search operators that are supported:
+
+### Match
+
+If you want to search for text in a single field, use MATCHQUERY or MATCH_QUERY functions.
+
+First parameter is the field name second one is the search query.
+```
+SELECT text, coralogix.metadata.severity
+FROM logs
+WHERE MATCH_QUERY(text, 'healthcheck')
+```
+Alternate syntax:
+```
+SELECT text, coralogix.metadata.severity
+FROM logs
+WHERE text = MATCH_QUERY('healthcheck')
+```
+
+### Multi match
+If you want to search for text in multiple fields, use MULTI_MATCH, MULTIMATCH, or MULTIMATCHQUERY functions.
+
+In this example, we search for `health` in either the text or lastname fields:
+
+```
+SELECT kubernetes.labels.app, kubernetes.labels.controller-uid
+FROM logs
+WHERE MULTI_MATCH('query'='prod', 'fields'='*labels*');
+```
+
+### Elasticsearch queries
+
+Elasticsearch queries are supported, you can write them in `QUERY` function:
 ```
 SELECT * FROM logs 
   WHERE
     QUERY('coralogix.metadata.subsystemName:AAA OR coralogix.metadata.subsystemName:BBB');
 ```
+
+### Match phrase
+
+If you want to search for exact phrases, use MATCHPHRASE, MATCH_PHRASE, or MATCHPHRASEQUERY functions.
+
+```
+SELECT text, coralogix.metadata.severity 
+FROM logs
+WHERE 
+   MATCH_PHRASE(text, 'DELETE FROM templates')
+```
+
+<!-- FIXME this needs to be implemented in es-sql-api in es json parser
+### Score query
+
+You can get relevance score along with every matching document, by using SCORE, SCOREQUERY, or SCORE_QUERY functions.
+
+The first argument is the MATCH_QUERY expression. The second argument is a floating point number to boost the score 
+(if not set default value is 1.0).
+
+```
+SELECT text, kubernetes.labels.app, _score
+FROM logs
+WHERE SCORE(MATCH_QUERY(text, '_updateTemplates'), 2) OR
+SCORE(MATCH_QUERY(kubernetes.labels.app, 'prod'), 10)
+ORDER BY _score desc
+```
+-->
