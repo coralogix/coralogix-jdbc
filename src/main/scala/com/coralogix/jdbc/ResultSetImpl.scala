@@ -3,7 +3,7 @@ package com.coralogix.jdbc
 import com.coralogix.sql.grpc.external.v1.SqlQueryService.QueryResponse
 import com.coralogix.jdbc.Conversions._
 import com.google.protobuf.struct.Value.Kind
-import com.google.protobuf.struct.Value.Kind.{ BoolValue, NullValue, NumberValue }
+import com.google.protobuf.struct.Value.Kind.{ BoolValue, NullValue, NumberValue, StringValue }
 
 import java.sql.{
   Date,
@@ -64,7 +64,7 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
       case k if f.isDefinedAt(k) => Right(Some(f(k)))
       case k =>
         Left(
-          s"Expected $typeName but got ${k.getClass.getSimpleName} with value ${anyValue(k).toString} at index $i"
+          s"Expected $typeName but got ${k.getClass.getName} with value ${anyValue(k).toString} at index $i"
         )
     }
   }
@@ -86,25 +86,53 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
     getValueByIndex(columnIndex, "String", stringValue).getOrNull
 
   override def getBoolean(columnIndex: Int): Boolean =
-    getValueByIndex(columnIndex, "Boolean", { case BoolValue(s) => s }).getOrDefault(false)
+    getValueByIndex(
+      columnIndex,
+      "Boolean",
+      { case BoolValue(s) => s; case StringValue(s) => s.toBoolean }
+    ).getOrDefault(false)
 
   override def getByte(columnIndex: Int): Byte =
-    getValueByIndex(columnIndex, "Byte", { case NumberValue(s) => s.toByte }).getOrDefault(0)
+    getValueByIndex(
+      columnIndex,
+      "Byte",
+      { case NumberValue(s) => s.toByte; case StringValue(s) => s.toByte }
+    ).getOrDefault(0)
 
   override def getShort(columnIndex: Int): Short =
-    getValueByIndex(columnIndex, "Short", { case NumberValue(s) => s.toShort }).getOrDefault(0)
+    getValueByIndex(
+      columnIndex,
+      "Short",
+      { case NumberValue(s) => s.toShort; case StringValue(s) => s.toShort }
+    ).getOrDefault(0)
 
   override def getInt(columnIndex: Int): Int =
-    getValueByIndex(columnIndex, "Int", { case NumberValue(s) => s.toInt }).getOrDefault(0)
+    getValueByIndex(
+      columnIndex,
+      "Int",
+      { case NumberValue(s) => s.toInt; case StringValue(s) => s.toInt }
+    ).getOrDefault(0)
 
   override def getLong(columnIndex: Int): Long =
-    getValueByIndex(columnIndex, "Long", { case NumberValue(s) => s.toLong }).getOrDefault(0)
+    getValueByIndex(
+      columnIndex,
+      "Long",
+      { case NumberValue(s) => s.toLong; case StringValue(s) => s.toLong }
+    ).getOrDefault(0)
 
   override def getFloat(columnIndex: Int): Float =
-    getValueByIndex(columnIndex, "Float", { case NumberValue(s) => s.toFloat }).getOrDefault(0)
+    getValueByIndex(
+      columnIndex,
+      "Float",
+      { case NumberValue(s) => s.toFloat; case StringValue(s) => s.toFloat }
+    ).getOrDefault(0)
 
   override def getDouble(columnIndex: Int): Double =
-    getValueByIndex(columnIndex, "Double", { case NumberValue(s) => s }).getOrDefault(0)
+    getValueByIndex(
+      columnIndex,
+      "Double",
+      { case NumberValue(s) => s; case StringValue(s) => s.toDouble }
+    ).getOrDefault(0)
 
   override def getBigDecimal(columnIndex: Int, scale: Int): java.math.BigDecimal =
     getValueByIndex(
@@ -137,25 +165,53 @@ case class ResultSetImpl(r: QueryResponse, cursorName: String, statement: Statem
     getValueByLabel(columnLabel, "String", stringValue).getOrNull
 
   override def getBoolean(columnLabel: String): Boolean =
-    getValueByLabel(columnLabel, "Boolean", { case BoolValue(s) => s }).getOrDefault(false)
+    getValueByLabel(
+      columnLabel,
+      "Boolean",
+      { case BoolValue(s) => s; case StringValue(s) => s.toBoolean }
+    ).getOrDefault(false)
 
   override def getByte(columnLabel: String): Byte =
-    getValueByLabel(columnLabel, "Byte", { case NumberValue(s) => s.toByte }).getOrDefault(0)
+    getValueByLabel(
+      columnLabel,
+      "Byte",
+      { case NumberValue(s) => s.toByte; case StringValue(s) => s.toByte }
+    ).getOrDefault(0)
 
   override def getShort(columnLabel: String): Short =
-    getValueByLabel(columnLabel, "Short", { case NumberValue(s) => s.toShort }).getOrDefault(0)
+    getValueByLabel(
+      columnLabel,
+      "Short",
+      { case NumberValue(s) => s.toShort; case StringValue(s) => s.toShort }
+    ).getOrDefault(0)
 
   override def getInt(columnLabel: String): Int =
-    getValueByLabel(columnLabel, "Int", { case NumberValue(s) => s.toInt }).getOrDefault(0)
+    getValueByLabel(
+      columnLabel,
+      "Int",
+      { case NumberValue(s) => s.toInt; case StringValue(s) => s.toInt }
+    ).getOrDefault(0)
 
   override def getLong(columnLabel: String): Long =
-    getValueByLabel(columnLabel, "Long", { case NumberValue(s) => s.toLong }).getOrDefault(0)
+    getValueByLabel(
+      columnLabel,
+      "Long",
+      { case NumberValue(s) => s.toLong; case StringValue(s) => s.toLong }
+    ).getOrDefault(0)
 
   override def getFloat(columnLabel: String): Float =
-    getValueByLabel(columnLabel, "Float", { case NumberValue(s) => s.toFloat }).getOrDefault(0)
+    getValueByLabel(
+      columnLabel,
+      "Float",
+      { case NumberValue(s) => s.toFloat; case StringValue(s) => s.toFloat }
+    ).getOrDefault(0)
 
   override def getDouble(columnLabel: String): Double =
-    getValueByLabel(columnLabel, "Double", { case NumberValue(s) => s }).getOrDefault(0)
+    getValueByLabel(
+      columnLabel,
+      "Double",
+      { case NumberValue(s) => s; case StringValue(s) => s.toDouble }
+    ).getOrDefault(0)
 
   override def getBigDecimal(columnLabel: String, scale: Int): java.math.BigDecimal =
     getValueByLabel(
