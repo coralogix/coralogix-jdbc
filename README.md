@@ -17,6 +17,10 @@ for **India**
 ```
 jdbc:coralogix://grpc-api.app.coralogix.in
 ```
+for **US**
+```
+jdbc:coralogix://grpc-api.coralogix.us
+```
 ## Properties
 | Property      | Description                      | Required | Default |
 | ------------- | -------------------------------- | -------- | ------- |
