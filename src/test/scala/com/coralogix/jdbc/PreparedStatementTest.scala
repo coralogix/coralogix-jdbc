@@ -1,6 +1,8 @@
 package com.coralogix.jdbc
 
 import com.coralogix.sql.grpc.external.v1.SqlQueryService.{
+  CheckRequest,
+  CheckResponse,
   ColumnDescriptor,
   QueryParameter,
   QueryRequest,
@@ -14,7 +16,7 @@ import com.google.protobuf.struct.Value
 import io.grpc.{ CallOptions, Status }
 import scalapb.zio_grpc.SafeMetadata
 import zio.test.Assertion.equalTo
-import zio.{ IO, Layer, Task, ZIO, ZLayer, ZManaged }
+import zio.{ IO, Layer, Runtime, Task, ZIO, ZLayer, ZManaged }
 import zio.test.{ assert, suite, testM, DefaultRunnableSpec }
 
 import java.sql.{ ResultSet, Timestamp }
@@ -44,13 +46,17 @@ object PreparedStatementTest extends DefaultRunnableSpec {
 
     override def schema(request: SchemaRequest): ZIO[R with Context, Status, SchemaResponse] =
       ZIO.fail(Status.NOT_FOUND)
+
+    override def check(request: CheckRequest): ZIO[R with Context, Status, CheckResponse] =
+      ZIO.succeed(CheckResponse(true))
   }
 
   def client(req: QueryRequest, res: QueryResponse): Layer[Throwable, SqlQueryServiceClient] =
     ZLayer.succeed(Service(req, res))
 
   def connection(req: QueryRequest, res: QueryResponse) =
-    ZManaged.makeEffect(new Driver().connect(client(req, res), "", 30))(_.close)
+    ZManaged
+      .makeEffect(new Driver().connect(Runtime.unsafeFromLayer(client(req, res)), "", 30))(_.close)
 
   def resultFrom[A](rs: ResultSet, f: ResultSet => A): Task[List[A]] =
     Task {
