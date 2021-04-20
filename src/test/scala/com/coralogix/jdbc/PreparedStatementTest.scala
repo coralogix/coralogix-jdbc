@@ -1,15 +1,15 @@
 package com.coralogix.jdbc
 
 import com.coralogix.sql.grpc.external.v1.SqlQueryService.{
-  CheckRequest,
-  CheckResponse,
   ColumnDescriptor,
   QueryParameter,
   QueryRequest,
   QueryResponse,
   Row,
   SchemaRequest,
-  SchemaResponse
+  SchemaResponse,
+  ValidateRequest,
+  ValidateResponse
 }
 import com.coralogix.sql.grpc.external.v1.SqlQueryService.ZioSqlQueryService.SqlQueryServiceClient
 import com.google.protobuf.struct.Value
@@ -47,8 +47,8 @@ object PreparedStatementTest extends DefaultRunnableSpec {
     override def schema(request: SchemaRequest): ZIO[R with Context, Status, SchemaResponse] =
       ZIO.fail(Status.NOT_FOUND)
 
-    override def check(request: CheckRequest): ZIO[R with Context, Status, CheckResponse] =
-      ZIO.succeed(CheckResponse(true))
+    override def validate(request: ValidateRequest): ZIO[R with Context, Status, ValidateResponse] =
+      ZIO.succeed(ValidateResponse(true))
   }
 
   def client(req: QueryRequest, res: QueryResponse): Layer[Throwable, SqlQueryServiceClient] =

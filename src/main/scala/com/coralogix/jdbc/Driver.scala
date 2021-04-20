@@ -1,6 +1,6 @@
 package com.coralogix.jdbc
 
-import com.coralogix.sql.grpc.external.v1.SqlQueryService.{ CheckRequest, CheckResponse }
+import com.coralogix.sql.grpc.external.v1.SqlQueryService.{ ValidateRequest, ValidateResponse }
 import com.coralogix.sql.grpc.external.v1.SqlQueryService.ZioSqlQueryService.SqlQueryServiceClient
 import io.grpc.{ ManagedChannelBuilder, Metadata }
 import scalapb.zio_grpc.{ SafeMetadata, ZManagedChannel }
@@ -83,9 +83,9 @@ class Driver extends java.sql.Driver {
 
     val runtime = Runtime.unsafeFromLayer(layer(host, port, apiKey, tls))
     // validate connection to server
-    runtime.unsafeRunSync(SqlQueryServiceClient.check(CheckRequest())) match {
-      case Success(CheckResponse(true, _, _)) => ()
-      case Success(CheckResponse(false, error, _)) =>
+    runtime.unsafeRunSync(SqlQueryServiceClient.validate(ValidateRequest())) match {
+      case Success(ValidateResponse(true, _, _)) => ()
+      case Success(ValidateResponse(false, error, _)) =>
         throw new SQLException(error)
       case Failure(cause) =>
         throw new SQLException(cause.squashTraceWith(_.asException).getMessage)
