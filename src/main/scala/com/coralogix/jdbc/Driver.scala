@@ -1,8 +1,10 @@
 package com.coralogix.jdbc
 
+import com.coralogix.sql.grpc.external.v1.SqlQueryService.{ ValidateRequest, ValidateResponse }
 import com.coralogix.sql.grpc.external.v1.SqlQueryService.ZioSqlQueryService.SqlQueryServiceClient
 import io.grpc.{ ManagedChannelBuilder, Metadata }
 import scalapb.zio_grpc.{ SafeMetadata, ZManagedChannel }
+import zio.Exit.{ Failure, Success }
 import zio._
 
 import java.sql.{ Connection, DriverPropertyInfo, SQLException, SQLFeatureNotSupportedException }
@@ -79,15 +81,24 @@ class Driver extends java.sql.Driver {
         throw new SQLException("Please specify apiKey property")
       )
 
-    connect(layer(host, port, apiKey, tls), url, getTimeout(properties))
+    val runtime = Runtime.unsafeFromLayer(layer(host, port, apiKey, tls))
+    // validate connection to server
+    runtime.unsafeRunSync(SqlQueryServiceClient.validate(ValidateRequest())) match {
+      case Success(ValidateResponse(true, _, _)) => ()
+      case Success(ValidateResponse(false, error, _)) =>
+        throw new SQLException(error)
+      case Failure(cause) =>
+        throw new SQLException(cause.squashTraceWith(_.asException).getMessage)
+    }
+    connect(runtime, url, getTimeout(properties))
   }
 
   def connect(
-    client: Layer[Throwable, SqlQueryServiceClient],
+    runtime: Runtime[SqlQueryServiceClient],
     url: String,
     queryTimeout: Int
   ): Connection =
-    new ConnectionImpl(Runtime.unsafeFromLayer(client), url, queryTimeout)
+    new ConnectionImpl(runtime, url, queryTimeout)
 
   def acceptsURL(url: String): Boolean =
     url != null && url.startsWith(URL_PREFIX)
