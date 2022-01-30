@@ -24,9 +24,9 @@ lazy val root = (project in file("."))
   .settings(
     name := "coralogix-jdbc",
     libraryDependencies ++= Seq(
-      "dev.zio" %% "zio"          % "1.0.3",
-      "dev.zio" %% "zio-test"     % "1.0.3" % Test,
-      "dev.zio" %% "zio-test-sbt" % "1.0.3" % Test,
+      "dev.zio" %% "zio"          % "1.0.13",
+      "dev.zio" %% "zio-test"     % "1.0.13" % Test,
+      "dev.zio" %% "zio-test-sbt" % "1.0.13" % Test,
       // gRPC deps:
       "com.thesamet.scalapb"               %% "scalapb-runtime-grpc"                    % scalapb.compiler.Version.scalapbVersion,
       "io.grpc"                             % "grpc-netty"                              % "1.34.0",
