@@ -29,7 +29,7 @@ lazy val root = (project in file("."))
       "dev.zio" %% "zio-test-sbt" % "1.0.3" % Test,
       // gRPC deps:
       "com.thesamet.scalapb"               %% "scalapb-runtime-grpc"                    % scalapb.compiler.Version.scalapbVersion,
-      "io.grpc"                             % "grpc-netty"                              % "1.34.0",
+      "io.grpc"                             % "grpc-netty"                              % "1.34.1",
       "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % "1.18.1-0" % "protobuf",
       "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % "1.18.1-0"
     ),
