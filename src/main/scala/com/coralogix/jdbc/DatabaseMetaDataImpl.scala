@@ -407,37 +407,36 @@ class DatabaseMetaDataImpl(
         .map(response =>
           ResultSetImpl(
             QueryResponse(
-              response.columnDescriptors.zipWithIndex.map {
-                case (column, index) =>
-                  val columnType = ElasticsearchType.byName(column.`type`.name)
-                  Row(
-                    List(
-                      str("coralogix"), // TABLE_CAT
-                      str("coralogix"), // TABLE_SCHEM
-                      str("logs"), // TABLE_NAME
-                      str(column.name), // COLUMN_NAME
-                      num(columnType.jdbcType.getVendorTypeNumber), // DATA_TYPE
-                      str(columnType.jdbcType.getName), // TYPE_NAME
-                      `null`, // COLUMN_SIZE
-                      `null`, // BUFFER_LENGTH
-                      `null`, // DECIMAL_DIGITS
-                      `null`, // NUM_PREC_RADIX
-                      num(DatabaseMetaData.columnNullableUnknown), // NULLABLE
-                      `null`, // REMARKS
-                      `null`, // COLUMN_DEF
-                      `null`, // SQL_DATA_TYPE
-                      `null`, // SQL_DATETIME_SUB
-                      `null`, // CHAR_OCTET_LENGTH
-                      num(index + 1), // ORDINAL_POSITION
-                      str(""), // IS_NULLABLE
-                      `null`, // SCOPE_CATALOG
-                      `null`, // SCOPE_SCHEMA
-                      `null`, // SCOPE_TABLE
-                      `null`, // SOURCE_DATA_TYPE
-                      str("NO"), // IS_AUTOINCREMENT
-                      str("NO") // IS_GENERATEDCOLUMN
-                    )
+              response.columnDescriptors.zipWithIndex.map { case (column, index) =>
+                val columnType = ElasticsearchType.byName(column.`type`.name)
+                Row(
+                  List(
+                    str("coralogix"), // TABLE_CAT
+                    str("coralogix"), // TABLE_SCHEM
+                    str("logs"), // TABLE_NAME
+                    str(column.name), // COLUMN_NAME
+                    num(columnType.jdbcType.getVendorTypeNumber), // DATA_TYPE
+                    str(columnType.jdbcType.getName), // TYPE_NAME
+                    `null`, // COLUMN_SIZE
+                    `null`, // BUFFER_LENGTH
+                    `null`, // DECIMAL_DIGITS
+                    `null`, // NUM_PREC_RADIX
+                    num(DatabaseMetaData.columnNullableUnknown), // NULLABLE
+                    `null`, // REMARKS
+                    `null`, // COLUMN_DEF
+                    `null`, // SQL_DATA_TYPE
+                    `null`, // SQL_DATETIME_SUB
+                    `null`, // CHAR_OCTET_LENGTH
+                    num(index + 1), // ORDINAL_POSITION
+                    str(""), // IS_NULLABLE
+                    `null`, // SCOPE_CATALOG
+                    `null`, // SCOPE_SCHEMA
+                    `null`, // SCOPE_TABLE
+                    `null`, // SOURCE_DATA_TYPE
+                    str("NO"), // IS_AUTOINCREMENT
+                    str("NO") // IS_GENERATEDCOLUMN
                   )
+                )
               },
               List(
                 cd("TABLE_CAT"),
