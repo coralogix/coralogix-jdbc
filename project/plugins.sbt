@@ -5,5 +5,5 @@ addSbtPlugin("io.github.davidgregory084"                % "sbt-tpolecat"        
 addSbtPlugin("ch.epfl.scala"                            % "sbt-missinglink"     % "0.3.1")
 addSbtPlugin("com.thesamet"                             % "sbt-protoc"          % "1.0.0-RC4")
 addSbtPlugin("com.coralogix"                            % "sbt-protodep"        % "0.0.7")
-addSbtPlugin("com.geirsson"                             % "sbt-ci-release"      % "1.5.3")
+addSbtPlugin("com.geirsson"                             % "sbt-ci-release"      % "1.5.7")
 libraryDependencies += "com.thesamet.scalapb.zio-grpc" %% "zio-grpc-codegen"    % "0.4.2"
