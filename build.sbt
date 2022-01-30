@@ -30,8 +30,8 @@ lazy val root = (project in file("."))
       // gRPC deps:
       "com.thesamet.scalapb"               %% "scalapb-runtime-grpc"                    % scalapb.compiler.Version.scalapbVersion,
       "io.grpc"                             % "grpc-netty"                              % "1.34.0",
-      "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % "1.18.1-0" % "protobuf",
-      "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % "1.18.1-0"
+      "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % "1.18.1-1" % "protobuf",
+      "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % "1.18.1-1"
     ),
     excludeDependencies ++= Seq(ExclusionRule("io.circe")),
     scalacOptions --= Seq("-language:implicitConversions", "-Wunused:params"),
